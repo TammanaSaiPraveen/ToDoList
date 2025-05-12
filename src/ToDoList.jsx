@@ -4,19 +4,34 @@ import './ToDoList.css';
 function ToDoList() {
   const [task, setTask] = useState('');
   const [tasks, setTasks] = useState([]);
+  const [editing, setEditing] = useState(null);
+  const [editText, setEditText] = useState('');
 
   // Handle input change
   const handleChange = (e) => {
     setTask(e.target.value);
   };
 
-  // Handle form submission
+  // Handle form submission for adding a task
   const handleSubmit = (e) => {
     e.preventDefault();
     if (task.trim()) {
       setTasks([...tasks, { id: Date.now(), text: task, completed: false }]);
       setTask('');
     }
+  };
+
+  // Handle editing a task
+  const handleEditChange = (e) => {
+    setEditText(e.target.value);
+  };
+
+  const handleEditSubmit = (id) => {
+    setTasks(tasks.map((task) =>
+      task.id === id ? { ...task, text: editText } : task
+    ));
+    setEditing(null);
+    setEditText('');
   };
 
   // Toggle task completion status
@@ -45,10 +60,25 @@ function ToDoList() {
       <ul className="todo-list">
         {tasks.map((task) => (
           <li key={task.id} className={`todo-item ${task.completed ? 'completed' : ''}`}>
-            <span onClick={() => toggleCompletion(task.id)} className="todo-text">
-              {task.text}
-            </span>
-            <button onClick={() => deleteTask(task.id)} className="todo-delete">Delete</button>
+            {editing === task.id ? (
+              <div className="edit-task">
+                <input
+                  type="text"
+                  value={editText}
+                  onChange={handleEditChange}
+                  placeholder="Edit task"
+                />
+                <button onClick={() => handleEditSubmit(task.id)} className="todo-submit">Save</button>
+              </div>
+            ) : (
+              <>
+                <span onClick={() => toggleCompletion(task.id)} className="todo-text">
+                  {task.text}
+                </span>
+                <button onClick={() => setEditing(task.id)} className="todo-edit">Edit</button>
+                <button onClick={() => deleteTask(task.id)} className="todo-delete">Delete</button>
+              </>
+            )}
           </li>
         ))}
       </ul>
